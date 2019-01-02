@@ -90,7 +90,7 @@ rostopic echo /record/bag_name
 ```
 It will print the bag name in that terminal window after the bag is started.
 
-##Stopping the recorder
+## Stopping the recorder
 The stop topic is defined in the launch file as well.
 ```
 <param name="stop_bag_topic"            type="string"       value="/record/stop"/>
@@ -104,11 +104,11 @@ rostopic pub /record/stop std_msgs/String "data: 'standard'"
 To get this you can type "rostopic pub /record/stop " then hit tab a few times which will fill in the rest, then you can edit the data value. If the param *stop_bag_topic* is set to anything else just substitute that in instead of /record/stop.
 
 
-##Notes
+## Notes
 Multiple bags can record at once. However, only one of each configuration can record at once.
 If you give it a configuration that does not exist then it will record all topics to the bag.
 
-##Dependancies
+## Dependancies
 This uses only standard ROS/BOOST/STD libraries which should be installed with a standard ROS package.
 
 With this you should be all good!
