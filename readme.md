@@ -109,11 +109,7 @@ Multiple bags can record at once. However, only one of each configuration can re
 If you give it a configuration that does not exist then it will record all topics to the bag.
 
 ##Dependancies
-This uses only standard ROS/BOOST/STD libraries. It also depends on robot_config being compiled, installed and sourced. To do this you can run the following:
-```
-catkin_make install --pkg robot_config
-source devel/setup.bash
-```
+This uses only standard ROS/BOOST/STD libraries which should be installed with a standard ROS package.
 
 With this you should be all good!
 
