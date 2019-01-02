@@ -1,0 +1,40 @@
+<package>
+  <name>bag_recorder</name>
+  <version>0.1.0</version>
+  <description>
+    This package provides programmatic control over the recording of
+    rosbags for C++. It is based heavily on the structure origionally
+    found in the rosbag source code.
+  </description>
+  <maintainer email="joshs333@live.com">Joshua Spisak</maintainer>
+  <license>BSD</license>
+
+  <buildtool_depend version_gte="0.5.78">catkin</buildtool_depend>
+
+  <build_depend>boost</build_depend>
+  <build_depend>cpp_common</build_depend>
+  <build_depend>python-imaging</build_depend>
+  <build_depend>rosbag_storage</build_depend>
+  <build_depend>rosconsole</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>roscpp_serialization</build_depend>
+  <build_depend>topic_tools</build_depend>
+  <build_depend>xmlrpcpp</build_depend>
+  <build_depend>message_generation</build_depend>
+  <build_depend>robot_config</build_depend>
+
+  <run_depend>boost</run_depend>
+  <run_depend>genmsg</run_depend>
+  <run_depend>genpy</run_depend>
+  <run_depend>python-rospkg</run_depend>
+  <run_depend>rosbag_storage</run_depend>
+  <run_depend>rosconsole</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>roslib</run_depend>
+  <run_depend>rospy</run_depend>
+  <run_depend>topic_tools</run_depend>
+  <run_depend>xmlrpcpp</run_depend>
+  <run_depend>message_runtime</run_depend>
+  <run_depend>robot_config</run_depend>
+
+</package>
