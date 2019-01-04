@@ -1,4 +1,17 @@
 # ROS Bag Recorder
+## Installing/Running the Recorder
+Clone this repository into the src/ folder of a ROS workspace. In the ROS workspace run the following commands.
+```
+catkin_make
+source devel/setup.bash
+```
+The code should compile. You can then run the node using roslaunch or rosrun.
+```
+roslaunch bag_recorder default.launch
+rosrun bag_recorder bag_recorder_node _configuration_directory:=<path to config> _data_directory:=<path to record bags to>
+```
+Note that the node requires you to specify configuration_directory and data_directory. Please read below to understand what those are.
+
 ## Launch File Usage
 To use this ROS bag recorder you need to modify the launch file to fit your project. Especially the data_directory option which is where the bag will be stored.
 ```
@@ -90,6 +103,70 @@ rostopic echo /record/bag_name
 ```
 It will print the bag name in that terminal window after the bag is started.
 
+### Starting the recorder programmatically (C++)
+The big advantage of this recorder is being programmatic so it can be triggered by a ROS topic. You can do this from any node. To do this you must set bag_recorder and std_msgs as dependencies to use the Rosbag/String message type.
+If you make the package using the catkin_create_pkg command you can add it to the list of dependencies.
+```
+catkin_create_pkg node_name_here roscpp std_msgs bag_recorder other_dependencies
+```
+If the node is already made you can do the following:
+In the CMakeLists.txt add "bag_recorder" and "std_msgs" to the find_package macro.
+```
+find_package(catkin REQUIRED COMPONENTS
+  ...
+  std_msgs
+  bag_recorder
+  ...
+)
+```
+If you use the catkin_package macro you can add "bag_recorder" and "std_msgs" to the CATKIN_DEPENDS category
+```
+catkin_package(
+  INCLUDE_DIRS ...
+  LIBRARIES ...
+  CATKIN_DEPENDS ... bag_recorder std_msgs ...
+  DEPENDS ...
+)
+```
+You must also add bag_recorder and std_msgs to package.xml.
+```
+  ...
+  <build_depend>bag_recorder</build_depend>
+  <build_depend>std_msgs</build_depend>
+  ...
+  <build_export_depend>bag_recorder</build_export_depend>
+  <build_export_depend>std_msgs</build_export_depend>
+  ...
+  <exec_depend>bag_recorder</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  ...
+```
+This is a bare-bones ROS node that publishes to a start topic.
+```
+#include <ros/ros.h>
+#include <bag_recorder/Rosbag.h>
+
+int main(int argc, char** argv) {
+    ros::init(argc, argv, "test_node");
+    ros::NodeHandle nh("~");
+    ros::Publisher bag_pub = nh.advertise<bag_recorder::Rosbag>("/record/start", 10);
+
+    bag_recorder::Rosbag message;
+    message.header.stamp = ros::Time::now();
+    message.config = "standard";
+    message.bag_name = "Test_bag_name";
+
+    while(ros::ok()) {
+        ROS_INFO("Publishing...");
+        bag_pub.publish(message);
+        ros::spinOnce();
+    }
+
+    return 0;
+}
+```
+Read above to understand what the **config** and **bag_name** categories mean.
+
 ## Stopping the recorder
 The stop topic is defined in the launch file as well.
 ```
@@ -103,10 +180,34 @@ rostopic pub /record/stop std_msgs/String "data: 'standard'"
 ```
 To get this you can type "rostopic pub /record/stop " then hit tab a few times which will fill in the rest, then you can edit the data value. If the param *stop_bag_topic* is set to anything else just substitute that in instead of /record/stop.
 
+### Stopping the recorder programmatically (C++)
+Follow the instructions above in Starting the recorder programmatically for adding the "bag_recorder" and "std_msgs" dependencies. The following is a basic ROS node in c++ that will publish a stop command.
+```
+#include <ros/ros.h>
+#include <std_msgs/String.h>
 
+int main(int argc, char** argv) {
+    ros::init(argc, argv, "test_node");
+    ros::NodeHandle nh("~");
+    ros::Publisher bag_pub = nh.advertise<std_msgs::String>("/record/stop", 10);
+
+    std_msgs::String message;
+    message.data = "standard";
+
+    while(ros::ok()) {
+        ROS_INFO("Publishing...");
+        bag_pub.publish(message);
+        ros::spinOnce();
+    }
+
+    return 0;
+}
+```
 ## Notes
 Multiple bags can record at once. However, only one of each configuration can record at once.
 If you give it a configuration that does not exist then it will record all topics to the bag.
+
+I favor C++ so I did my sample code above in C++... if you are confused and need sample code in python shoot me an email and I'll throw it together for you.
 
 ## Dependancies
 This uses only standard ROS/BOOST/STD libraries which should be installed with a standard ROS package.
