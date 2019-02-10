@@ -77,6 +77,8 @@ namespace bag_launcher_node {
         std::string heartbeat_topic;
         //! if publish_heartbeat, interval in seconds on which to publish the heartbeat
         double heartbeat_interval;
+        //! if no config of a given name is found, default to record all if true
+        bool default_record_all;
     };
 
     class BagLauncher {
@@ -90,7 +92,7 @@ namespace bag_launcher_node {
             void Start_Recording(const bag_recorder::Rosbag::ConstPtr& msg);
             void Stop_Recording(const std_msgs::String::ConstPtr& msg);
             std::string sanitize_topic(std::string topic);
-            void load_config(std::string config_file_name, std::vector<std::string>& topics, std::set<std::string> loaded = std::set<std::string>());
+            bool load_config(std::string config_file_name, std::vector<std::string>& topics, std::set<std::string> loaded = std::set<std::string>());
 
         private:
             ros::NodeHandle nh_;
@@ -103,6 +105,7 @@ namespace bag_launcher_node {
             std::string heartbeat_topic_;
             double heartbeat_interval_;
             ros::Publisher name_publisher_;
+            bool default_record_all_;
 
             std::map<std::string, std::shared_ptr<HeartBeat>> heartbeats_;
             std::map<std::string, std::shared_ptr<BagRecorder>> recorders_;

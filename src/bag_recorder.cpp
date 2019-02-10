@@ -149,15 +149,27 @@ std::string BagRecorder::start_recording(std::string bag_name, std::vector<std::
 
     message_queue_ = new std::queue<OutgoingMessage>;
 
-    if((topics.size() == 1 && topics[0] == "*") || record_all_topics) {
+    //test for asterisk to subscribe all topics
+    foreach(string const& topic, topics) {
+        if(topic.find("*") != std::string::npos) {
+            record_all_topics = true;
+        }
+    }
+
+    if(record_all_topics) {
         recording_all_topics_ = true;
         subscribe_all();
     } else if(topics.size() > 0) {
         // Subscribe to specified topics
         foreach(string const& topic, topics)
             //prevent multiple subscriptions
-            if (subscribed_topics_.find(topic) == subscribed_topics_.end())
-                subscribers_.push_back(generate_subscriber(topic));
+            if (subscribed_topics_.find(topic) == subscribed_topics_.end()) {
+                try {
+                    subscribers_.push_back(generate_subscriber(topic));
+                } catch(ros::InvalidNameException) {
+                    ROS_ERROR("Invalid topic name: %s, no subscriber generated.", topic.c_str());
+                }
+            }
     } else {
         ROS_ERROR("No Topics Supplied to be recorded. Aborting bag %s.", bag_name.c_str());
         return "";

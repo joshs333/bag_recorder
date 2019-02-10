@@ -20,7 +20,8 @@ BLOptions::BLOptions():
     name_topic("/bag/name"),
     publish_heartbeat(true),
     heartbeat_topic("/bag/heartbeat"),
-    heartbeat_interval(10)
+    heartbeat_interval(10),
+    default_record_all(false)
 {}
 
 /**
@@ -35,7 +36,8 @@ BagLauncher::BagLauncher(ros::NodeHandle nh, BLOptions options):
     record_start_subscriber_(nh.subscribe(options.record_start_topic, 10, &BagLauncher::Start_Recording, this)),
     record_stop_subscriber_(nh.subscribe(options.record_stop_topic, 10, &BagLauncher::Stop_Recording, this)),
     publish_name_(options.publish_name), publish_heartbeat_(options.publish_heartbeat),
-    heartbeat_topic_(options.heartbeat_topic), heartbeat_interval_(options.heartbeat_interval) {
+    heartbeat_topic_(options.heartbeat_topic), heartbeat_interval_(options.heartbeat_interval),
+    default_record_all_(options.default_record_all) {
 
     if(options.publish_name) {
         name_publisher_ = nh.advertise<bag_recorder::Rosbag>(sanitize_topic(options.name_topic), 5);
@@ -76,8 +78,13 @@ void BagLauncher::Start_Recording(const bag_recorder::Rosbag::ConstPtr& msg){
 
     //start recording
     std::vector<std::string> topics;
-    load_config(msg->config, topics);
-    std::string full_bag_name = recorders_[msg->config]->start_recording(msg->bag_name, topics);
+    std::string full_bag_name = "";
+    if(load_config(msg->config, topics)) {
+        full_bag_name = recorders_[msg->config]->start_recording(msg->bag_name, topics);
+    } else {
+        ROS_ERROR("No such config: %s, was able to be loaded from. Recorder not started.", msg->config.c_str());
+        return;
+    }
 
     //make sure there were no errors and bag was made
     if(full_bag_name == "") {
@@ -170,7 +177,7 @@ std::string BagLauncher::sanitize_topic(std::string topic){
 * allows linking to other config files with '$', also allows comments with '#'
 * loads other config files with recursion
 */
-void BagLauncher::load_config(std::string config_name, std::vector<std::string>& topics, std::set<std::string> loaded) {
+bool BagLauncher::load_config(std::string config_name, std::vector<std::string>& topics, std::set<std::string> loaded) {
     std::string config_file_name = config_location_ + config_name + ".config";
     std::ifstream fd(config_file_name.c_str());
     std::string line;
@@ -180,17 +187,20 @@ void BagLauncher::load_config(std::string config_name, std::vector<std::string>&
         loaded.insert(config_name);
     } else {
         ROS_WARN("%s config loaded alread, circular reference detected.", config_name.c_str());
-        return;
+        return false;
     }
 
     if( !fd ) {
-        // if this is the first layer then we record all
-        if(loaded.size() <= 1) {
+        // if this is the first layer by default we record all if no config is
+        // found then we can record all
+        if(loaded.size() <= 1 && default_record_all_) {
             ROS_ERROR("Topic input file name invalid, recording everything");
             topics.push_back("*");
+            return true;
         } else {
             //else we just throw an error
             ROS_WARN("Linked config: %s is invalid.", config_name.c_str());
+            return false;
         }
     } else {
         while( std::getline(fd,line) ) {
@@ -203,9 +213,9 @@ void BagLauncher::load_config(std::string config_name, std::vector<std::string>&
                 load_config(line.substr(1), topics, loaded);
                 continue;
             }
-
             topics.push_back(sanitize_topic(line));
         }
+        return true;
     }
 } // load_config()
 

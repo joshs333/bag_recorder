@@ -29,6 +29,7 @@ int main(int argc, char** argv) {
     //load bool params
     nh.param<bool>("publish_name",              options.publish_name,       true);
     nh.param<bool>("publish_heartbeat",         options.publish_heartbeat,  true);
+    nh.param<bool>("default_record_all",        options.default_record_all, false);
 
     //load double param
     nh.param<double>("heartbeat_interval",      options.heartbeat_interval, 10);

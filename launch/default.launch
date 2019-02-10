@@ -1,11 +1,11 @@
 <launch>
 
     <!-- Launch recorder node -->
-    <node pkg="rosbag_recorder" type="rosbag_recorder" name="rosbag_recorder_node" output="screen" respawn="true">
+    <node pkg="bag_recorder" type="bag_recorder_node" name="rosbag_recorder_node" output="screen" respawn="true">
         <!-- Directory containing configuration files for the bag launcher to read -->
-        <param name="configuration_directory"   type="string"       value="$(find rosbag_recorder)/config"/>
+        <param name="configuration_directory"   type="string"       value="$(find bag_recorder)/config"/>
         <!-- Directory for the bags to be recorded to -->
-        <param name="data_directory"            type="string"       value="/media/data/"/>
+        <param name="data_directory"            type="string"       value="/home/parallels/data/"/>
         <!-- Topic for bag launcher to listen to for launching bags -->
         <param name="start_bag_topic"           type="string"       value="/record/start"/>
         <!-- Topic for bag launcher to listen to for stopping bags -->
@@ -20,6 +20,8 @@
         <param name="heartbeat_topic"           type="string"       value="/record/heartbeat"/>
         <!-- Interval in seconds on which to publish bag heartbeats -->
         <param name="heartbeat_interval"        type="double"       value="10.0"/>
+        <!-- Whether or not to default to recording all topics if a config file is not found -->
+        <param name="default_record_all"        type="bool"         value="false"/>
     </node>
 
 </launch>
