@@ -40,6 +40,7 @@ add_executable(${PROJECT_NAME}_node src/rosbag_recorder_node.cpp  src/bag_launch
 target_link_libraries(bag_recorder_node
                       recorder
                       ${catkin_LIBRARIES})
+add_dependencies(${PROJECT_NAME}_node ${PROJECT_NAME}_generate_messages_cpp)
 
 
 
