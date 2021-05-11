@@ -19,7 +19,7 @@ To use this ROS bag recorder you need to modify the launch file to fit your proj
 ```
 By default the configuration files are in the config folder of the rosbag_recorder package, but you can make it wherever you want.
 ```
-<param name="configuration_directory"   type="string"       value="$(find rosbag_recorder)/config"/>
+<param name="configuration_directory"   type="string"       value="$(find bag_recorder)/config"/>
 ```
 If neither of these parameters are set then the node will not run.
 
